@@ -1,0 +1,171 @@
+#--------------------------------------
+#Author: Jiahao.Xia
+#--------------------------------------
+
+from yacs.config import CfgNode as CN
+
+import os
+
+_C = CN()
+_C.GPUS = (1, )
+_C.WORKERS = 16
+_C.PIN_MEMORY = True
+_C.AUTO_RESUME = True
+_C.PRINT_FREQ = 10
+
+_C.DATASET = CN()
+_C.DATASET.CHANNEL = 3
+_C.DATASET.DATASET = 'eCelebV_v2e'    # eCelebV_v2e ESIE
+_C.DATASET.REPR = 'frame'   # frame voxel timesurface
+
+_C.MODEL = CN()
+_C.MODEL.NAME = "cmfa_ss_fvt_frame"
+# _C.MODEL.NAME = "tmp"
+_C.MODEL.IMG_SIZE = 256
+_C.MODEL.INIT_WEIGHTS = True
+_C.MODEL.PRETRAINED = None
+_C.MODEL.POINT_NUM = 98
+_C.MODEL.OUT_DIM = 256
+_C.MODEL.NUM_JOINTS = 98
+_C.MODEL.ITER_NUM = 1
+_C.MODEL.BACKBONE = 'resnet50'
+_C.MODEL.TRAINABLE = True
+_C.MODEL.INTER_LAYER = True
+_C.MODEL.DILATION = False
+_C.MODEL.EMBEDDING = 'v2'
+_C.MODEL.PRETRAINED = "./backbone_weights/ssmer_frame_voxel_timesurface.pth.tar"    # event backbone
+_C.MODEL.CKPT = "./Checkpoint/WFLW_6_layer.pth" # rgb backbone
+_C.MODEL.INIT_WEIGHTS = True
+_C.MODEL.HEATMAP = 64
+_C.MODEL.SAMPLE_NUM = 7
+
+_C.TRANSFORMER = CN()
+_C.TRANSFORMER.NHEAD = 8
+_C.TRANSFORMER.NUM_DECODER = 6
+_C.TRANSFORMER.FEED_DIM = 1024
+
+_C.CUDNN = CN()
+_C.CUDNN.BENCHMARK = True
+_C.CUDNN.DETERMINISTIC = False
+_C.CUDNN.ENABLED = True
+
+_C.LOSS = CN()
+_C.LOSS.USE_TARGET_WEIGHT = True
+
+_C.TRAIN = CN()
+_C.TRAIN.TRAIN = True
+_C.TRAIN.SHUFFLE = True
+_C.TRAIN.LR = 0.001
+_C.TRAIN.LR_FACTOR = 0.1
+_C.TRAIN.LR_STEP = [120, 140]
+_C.TRAIN.OPTIMIZER = "adam"
+_C.TRAIN.BATCH_SIZE_PER_GPU = 64
+_C.TRAIN.BEGIN_EPOCH = 0
+_C.TRAIN.NUM_EPOCH = 200
+
+_C.TEST = CN()
+_C.TEST.POST_PROCESS = True
+_C.TEST.BATCH_SIZE_PER_GPU = 32
+_C.TEST.RESULT_PATH = './Results'
+_C.TEST.CHECKPOINT = "./Checkpoint/eCelebV_v2e/cmfa_ss_fvt_frame.pth"
+_C.HYPERPARAMETERS = CN()
+
+# High-Resoluion Net
+_C.MODEL.EXTRA = CN()
+_C.MODEL.EXTRA.PRETRAINED_LAYERS = ['*']
+_C.MODEL.EXTRA.STEM_INPLANES = 64
+_C.MODEL.EXTRA.FINAL_CONV_KERNEL = 1
+_C.MODEL.EXTRA.WITH_HEAD = True
+
+_C.MODEL.EXTRA.STAGE2 = CN()
+_C.MODEL.EXTRA.STAGE2.NUM_MODULES = 1
+_C.MODEL.EXTRA.STAGE2.NUM_BRANCHES = 2
+_C.MODEL.EXTRA.STAGE2.NUM_BLOCKS = [4, 4]
+_C.MODEL.EXTRA.STAGE2.NUM_CHANNELS = [18, 36]
+_C.MODEL.EXTRA.STAGE2.BLOCK = 'BASIC'
+_C.MODEL.EXTRA.STAGE2.FUSE_METHOD = 'SUM'
+
+_C.MODEL.EXTRA.STAGE3 = CN()
+_C.MODEL.EXTRA.STAGE3.NUM_MODULES = 1
+_C.MODEL.EXTRA.STAGE3.NUM_BRANCHES = 3
+_C.MODEL.EXTRA.STAGE3.NUM_BLOCKS = [4, 4, 4]
+_C.MODEL.EXTRA.STAGE3.NUM_CHANNELS = [18, 36, 72]
+_C.MODEL.EXTRA.STAGE3.BLOCK = 'BASIC'
+_C.MODEL.EXTRA.STAGE3.FUSE_METHOD = 'SUM'
+
+_C.MODEL.EXTRA.STAGE4 = CN()
+_C.MODEL.EXTRA.STAGE4.NUM_MODULES = 1
+_C.MODEL.EXTRA.STAGE4.NUM_BRANCHES = 4
+_C.MODEL.EXTRA.STAGE4.NUM_BLOCKS = [4, 4, 4, 4]
+_C.MODEL.EXTRA.STAGE4.NUM_CHANNELS = [18, 36, 72, 144]
+_C.MODEL.EXTRA.STAGE4.BLOCK = 'BASIC'
+_C.MODEL.EXTRA.STAGE4.FUSE_METHOD = 'SUM'
+
+_C.eCelebV = CN()
+_C.eCelebV.ROOT = '/mnt/hdd1/celebvhq/event_v2e'
+_C.eCelebV.NUM_POINT = 98
+_C.eCelebV.FRACTION = 1.20
+_C.eCelebV.SCALE = 0.05
+_C.eCelebV.ROTATION = 15
+_C.eCelebV.TRANSLATION = 0.05
+_C.eCelebV.OCCLUSION_MEAN = 0.20
+_C.eCelebV.OCCLUSION_STD = 0.08
+_C.eCelebV.DATA_FORMAT = "RGB"
+_C.eCelebV.FLIP = True
+_C.eCelebV.CHANNEL_TRANSFER = True
+_C.eCelebV.OCCLUSION = True
+_C.eCelebV.INITIAL_PATH = './Config/init_98.npz'
+
+_C.ESIE = CN()
+_C.ESIE.ROOT = '/mnt/hdd1/esie'
+_C.ESIE.NUM_POINT = 5
+_C.ESIE.FRACTION = 1.20
+_C.ESIE.SCALE = 0.05
+_C.ESIE.ROTATION = 15
+_C.ESIE.TRANSLATION = 0.05
+_C.ESIE.OCCLUSION_MEAN = 0.20
+_C.ESIE.OCCLUSION_STD = 0.08
+_C.ESIE.DATA_FORMAT = "Event"
+_C.ESIE.FLIP = True
+_C.ESIE.CHANNEL_TRANSFER = True
+_C.ESIE.OCCLUSION = True
+
+_C.WFLW = CN()
+_C.WFLW.ROOT = './Data/WFLW'
+_C.WFLW.NUM_POINT = 98
+_C.WFLW.FRACTION = 1.20
+_C.WFLW.SCALE = 0.05
+_C.WFLW.ROTATION = 15
+_C.WFLW.TRANSLATION = 0.05
+_C.WFLW.OCCLUSION_MEAN = 0.20
+_C.WFLW.OCCLUSION_STD = 0.08
+_C.WFLW.DATA_FORMAT = "RGB"
+_C.WFLW.FLIP = True
+_C.WFLW.CHANNEL_TRANSFER = True
+_C.WFLW.OCCLUSION = True
+_C.WFLW.INITIAL_PATH = './Config/init_98.npz'
+
+def update_config(cfg, args):
+    cfg.defrost()
+
+    if args.modelDir:
+        cfg.OUTPUT_DIR = args.modelDir
+
+    if args.logDir:
+        cfg.LOG_DIR = args.logDir
+
+    if args.dataDir:
+        cfg.DATA_DIR = args.dataDir
+
+    if args.target:
+        cfg.TARGET = args.target
+
+
+    if cfg.MODEL.PRETRAINED is not None:
+        cfg.MODEL.PRETRAINED = os.path.join(
+            cfg.DATA_DIR, cfg.MODEL.PRETRAINED
+        )
+    else:
+        cfg.MODEL.PRETRAINED = None
+
+    cfg.freeze()
