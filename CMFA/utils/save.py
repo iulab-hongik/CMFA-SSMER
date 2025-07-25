@@ -28,10 +28,42 @@ def save_img(meta, landmarks, radius=2, color='lime'):
     createDirectory(dest_dir)
     img_path = meta['Event_path'][0]
     img_name = img_path.split('/')[-1]
+    bbox = meta['BBox']
 
     # Open the txt file
-    image = Image.open(img_path)
-    if cfg.DATASET.DATASET == 'eCelebV_v2e':
+    image = Image.open(img_path).convert('RGB')
+
+    # Crop using bbox if dataset is WFLWV
+    if cfg.DATASET.DATASET == 'WFLWV':
+        if isinstance(bbox, torch.Tensor):
+            bbox = bbox.cpu().numpy()[0]  # shape: (4,)
+
+        x, y, w, h = bbox
+        center_x = x + w / 2
+        center_y = y + h / 2
+
+        square_size = max(w, h) * 1.25
+
+        left = int(center_x - square_size / 2)
+        top = int(center_y - square_size / 2)
+        right = int(center_x + square_size / 2)
+        bottom = int(center_y + square_size / 2)
+
+        # Crop the square region
+        image = image.crop((left, top, right, bottom))
+
+        if isinstance(landmarks, torch.Tensor):
+            landmarks = landmarks.cpu().numpy()[0]  # shape: (N, 2)
+
+        landmarks[:, 0] = landmarks[:, 0] - left
+        landmarks[:, 1] = landmarks[:, 1] - top
+
+        scale = 512 / square_size
+        landmarks[:, 0] = landmarks[:, 0] * scale
+        landmarks[:, 1] = landmarks[:, 1] * scale
+
+
+    if cfg.DATASET.DATASET in ['eCelebV_v2e', 'WFLWV']:
         image = image.resize((512, 512))
     draw = ImageDraw.Draw(image)
 
@@ -63,9 +95,9 @@ def save_comparison(meta, stage1=None, stage2=None, stage3=None, gt=None):
     img_path = meta['Event_path'][0]
     img_name = img_path.split('/')[-1]
     image = Image.open(img_path)
+    save_path = os.path.join(dest_dir, img_name)
 
     if cfg.DATASET.DATASET == 'eCelebV_v2e':
-        save_path = os.path.join(dest_dir, img_name)
         image = image.resize((512, 512))
 
     elif cfg.DATASET.DATASET in ['ESIE']:

@@ -13,7 +13,7 @@ class Alignment_Loss(nn.Module):
         if input_tensor.shape != ground_truth.shape:
             ground_truth = ground_truth.unsqueeze(1)
         L2_Loss = torch.mean(torch.norm((input_tensor - ground_truth), dim=3), dim=2)
-        if self.flag == 'WFLW' or 'CelebV' in self.flag:
+        if 'WFLW' in self.flag or 'CelebV' in self.flag:
             L2_norm = torch.norm(ground_truth[:, :, 60, :] - ground_truth[:, :, 72, :], dim=2)
         L2_Loss = L2_Loss / L2_norm
         return torch.mean(L2_Loss)

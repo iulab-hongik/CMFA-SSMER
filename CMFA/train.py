@@ -6,7 +6,7 @@ from Config import update_config
 from utils import create_logger
 from utils import save_checkpoint
 from model import Sparse_alignment_network
-from Dataloader import eCelebV_Dataset
+from Dataloader import eCelebV_Dataset, WFLWV_Dataset
 from backbone import Alignment_Loss
 from utils import get_optimizer
 from tools import train
@@ -70,6 +70,11 @@ def main_function():
                                          cfg.MODEL.TRAINABLE, cfg.MODEL.INTER_LAYER,
                                          cfg.MODEL.DILATION, cfg.TRANSFORMER.NHEAD,
                                          cfg.TRANSFORMER.FEED_DIM, cfg.eCelebV.INITIAL_PATH, cfg)
+    elif cfg.DATASET.DATASET == "WFLWV":
+        model = Sparse_alignment_network(cfg.WFLWV.NUM_POINT, cfg.MODEL.OUT_DIM,
+                                         cfg.MODEL.TRAINABLE, cfg.MODEL.INTER_LAYER,
+                                         cfg.MODEL.DILATION, cfg.TRANSFORMER.NHEAD,
+                                         cfg.TRANSFORMER.FEED_DIM, cfg.WFLWV.INITIAL_PATH, cfg)
     else:
         raise ValueError('Wrong Dataset')
     torch.cuda.set_device(torch.device(f'cuda:{cfg.GPUS[0]}'))
@@ -98,6 +103,22 @@ def main_function():
 
         valid_dataset = eCelebV_Dataset(
             cfg, cfg.eCelebV.ROOT, 'val',
+            transforms.Compose([
+                transforms.ToTensor(),
+                normalize,
+            ])
+        )
+    elif "WFLWV" in cfg.DATASET.DATASET:
+        train_dataset = WFLWV_Dataset(
+            cfg, cfg.WFLWV.ROOT, 'train',
+            transforms.Compose([
+                transforms.ToTensor(),
+                normalize,
+            ])
+        )
+
+        valid_dataset = WFLWV_Dataset(
+            cfg, cfg.WFLWV.ROOT, 'test',
             transforms.Compose([
                 transforms.ToTensor(),
                 normalize,

@@ -15,7 +15,7 @@ _C.PRINT_FREQ = 10
 
 _C.DATASET = CN()
 _C.DATASET.CHANNEL = 3
-_C.DATASET.DATASET = 'eCelebV_v2e'    # eCelebV_v2e ESIE
+_C.DATASET.DATASET = 'WFLWV'    # eCelebV_v2e ESIE WFLWV
 _C.DATASET.REPR = 'frame'   # frame voxel timesurface
 
 _C.MODEL = CN()
@@ -115,6 +115,22 @@ _C.eCelebV.FLIP = True
 _C.eCelebV.CHANNEL_TRANSFER = True
 _C.eCelebV.OCCLUSION = True
 _C.eCelebV.INITIAL_PATH = './Config/init_98.npz'
+
+_C.WFLWV = CN()
+_C.WFLWV.ROOT = '/mnt/hdd1/wflwv2'
+# _C.WFLWV.ROOT = '/mnt/hdd1/WFLW_V3'
+_C.WFLWV.NUM_POINT = 98
+_C.WFLWV.FRACTION = 1.20
+_C.WFLWV.SCALE = 0.05
+_C.WFLWV.ROTATION = 15
+_C.WFLWV.TRANSLATION = 0.05
+_C.WFLWV.OCCLUSION_MEAN = 0.20
+_C.WFLWV.OCCLUSION_STD = 0.08
+_C.WFLWV.DATA_FORMAT = "RGB"
+_C.WFLWV.FLIP = True
+_C.WFLWV.CHANNEL_TRANSFER = True
+_C.WFLWV.OCCLUSION = True
+_C.WFLWV.INITIAL_PATH = './Config/init_98.npz'
 
 _C.ESIE = CN()
 _C.ESIE.ROOT = '/mnt/hdd1/esie'

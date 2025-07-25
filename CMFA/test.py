@@ -5,7 +5,7 @@ from Config import update_config
 
 from utils import create_logger
 from model import Sparse_alignment_network
-from Dataloader import WFLW_Dataset, W300_Dataset, eCelebV_Dataset, ESIE_Dataset
+from Dataloader import WFLWV_Dataset, eCelebV_Dataset, ESIE_Dataset
 from utils import AverageMeter
 from utils.save import save_img, save_comparison
 
@@ -40,7 +40,7 @@ def calcuate_loss(name, pred, gt, trans, thres=0.10):
 
     pred = (pred - trans[:, 2]) @ np.linalg.inv(trans[:, 0:2].T)
 
-    if name == 'WFLW' or 'CelebV' in name:
+    if name == 'WFLWV' or 'CelebV' in name:
         norm = np.linalg.norm(gt[60, :] - gt[72, :])
     elif name in ['ESIE']:
         pred = pred[[54, 76, 82, 96, 97], :]
@@ -69,10 +69,23 @@ def main_function():
     torch.backends.cudnn.deterministic = cfg.CUDNN.DETERMINISTIC
     torch.backends.cudnn.enabled = cfg.CUDNN.ENABLED
 
-    model = Sparse_alignment_network(cfg.eCelebV.NUM_POINT, cfg.MODEL.OUT_DIM,
-                                cfg.MODEL.TRAINABLE, cfg.MODEL.INTER_LAYER,
-                                cfg.MODEL.DILATION, cfg.TRANSFORMER.NHEAD,
-                                cfg.TRANSFORMER.FEED_DIM, cfg.eCelebV.INITIAL_PATH, cfg)
+    if "eCelebV" in cfg.DATASET.DATASET:
+        model = Sparse_alignment_network(cfg.eCelebV.NUM_POINT, cfg.MODEL.OUT_DIM,
+                                         cfg.MODEL.TRAINABLE, cfg.MODEL.INTER_LAYER,
+                                         cfg.MODEL.DILATION, cfg.TRANSFORMER.NHEAD,
+                                         cfg.TRANSFORMER.FEED_DIM, cfg.eCelebV.INITIAL_PATH, cfg)
+    elif cfg.DATASET.DATASET == "ESIE":
+        model = Sparse_alignment_network(cfg.ESIE.NUM_POINT, cfg.MODEL.OUT_DIM,
+                                         cfg.MODEL.TRAINABLE, cfg.MODEL.INTER_LAYER,
+                                         cfg.MODEL.DILATION, cfg.TRANSFORMER.NHEAD,
+                                         cfg.TRANSFORMER.FEED_DIM, cfg.ESIE.INITIAL_PATH, cfg)
+    elif cfg.DATASET.DATASET == "WFLWV":
+        model = Sparse_alignment_network(cfg.WFLWV.NUM_POINT, cfg.MODEL.OUT_DIM,
+                                         cfg.MODEL.TRAINABLE, cfg.MODEL.INTER_LAYER,
+                                         cfg.MODEL.DILATION, cfg.TRANSFORMER.NHEAD,
+                                         cfg.TRANSFORMER.FEED_DIM, cfg.WFLWV.INITIAL_PATH, cfg)
+    else:
+        raise ValueError('Wrong Dataset')
 
     torch.cuda.set_device(torch.device(f'cuda:{cfg.GPUS[0]}'))
     model = torch.nn.DataParallel(model, device_ids=cfg.GPUS).cuda()
@@ -98,7 +111,15 @@ def main_function():
         )
     elif "ESIE" in cfg.DATASET.DATASET:
         valid_dataset = ESIE_Dataset(
-            cfg, cfg.eCelebV.ROOT, 'test',
+            cfg, cfg.ESIE.ROOT, 'test',
+            transforms.Compose([
+                transforms.ToTensor(),
+                normalize,
+            ])
+        )
+    elif "WFLWV" in cfg.DATASET.DATASET:
+        valid_dataset = WFLWV_Dataset(
+            cfg, cfg.WFLWV.ROOT, 'test',
             transforms.Compose([
                 transforms.ToTensor(),
                 normalize,
