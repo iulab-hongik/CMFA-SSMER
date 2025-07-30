@@ -18,7 +18,7 @@ python train.py
 Please change the pre-trained weight path in `./Config/defaults.py`
 
 ## E-SIE Dataset
-- Download link : [Google Drive](https://drive.google.com/file/d/1X4Ikkm-RgWj7yMSv3Wq_rGEeGwgUQGc1/view?usp=sharing)
+- Download link :
 
 ## Pretrained Model
 - Pretrained weight :
