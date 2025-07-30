@@ -1,6 +1,6 @@
 # SSMER
 
-### Anaconda virtual env setup
+## Anaconda virtual env setup
 ```
 # Install conda env
 conda create -n ssmer python=3.10
@@ -10,7 +10,7 @@ conda create -n ssmer python=3.10
 pip install -r requirements.txt
 ```
 
-### dataset directory structure
+## dataset directory structure
 - frame representation path
   - /your dataset directory path/frame
 - voxel representation path
@@ -19,7 +19,7 @@ pip install -r requirements.txt
   - /your dataset directory path/timesurface
 - move train_val_test_split_multilabel.json & train_val_test_split_multilabel_mod.json to your dataset path
 
-### train code
+## Train
 options
 - -r: event representation
   - f: frame
@@ -36,3 +36,6 @@ options
 # train code for the SSMER
 python ssmer_split.py -r frame,voxel,timesurface --epochs 200 --lr 0.05 --gpu 0 -b 64 --save-folder ./checkpoint/v2e_max_hrnet/frame_voxel_timesurface_0.05 /mnt/ssd1/data/celebvhq_scene_v2e
 ```
+
+## Acknowledgements
+This repository borrows or partially modifies the models from [SimSiam](https://github.com/facebookresearch/simsiam)
